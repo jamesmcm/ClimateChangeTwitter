@@ -97,3 +97,97 @@ class TweetGetter(object):
                 
         
 
+    def buildUserDB(self, userdict=None):
+        #Want to build new dictionary of followers/following for each user we have
+        #Need to handle cursoring i.e. only returned in 5000 steps, maybe look up friend/follower count
+        # Cursoring pseudocode from documentation:
+        # cursor = -1
+        # api_path = "https://api.twitter.com/1.1/endpoint.json?screen_name=targetUser" 
+        # do {
+        #     url_with_cursor = api_path + "&cursor=" + cursor      
+        #     response_dictionary = perform_http_get_request_for_url( url_with_cursor )
+        #     cursor = response_dictionary[ 'next_cursor' ]
+        # }
+        # while ( cursor != 0 )
+        userslist=[]
+        for item in self.twitterdict.keys():
+            name=self.twitterdict[item]["screen_name"]
+            if (not (name in userslist)):
+                userslist.append(name)
+
+        if userdict==None:
+            userdict={}
+        #print userslist
+        for name in userslist:
+            if (not (name in userdict.keys())):
+                followerslist=self.getFollowers(name, [], -1)
+                friendslist=self.getFriends(name, [], -1)
+                userdict[name]={"screen_name":name, "followers_list":followerslist, "friends_list":friendslist}
+                fname="usersdict_"+self.filename
+                picklefile=open(fname, "w")
+                pickle.dump(userdict,picklefile)
+                picklefile.close()
+        
+
+        return userdict
+
+    def loadPickle(self, filename):
+        picklefile=open(filename,"r")
+        data=pickle.load(picklefile)
+        picklefile.close()
+        return data
+    
+    def getFollowers(self, name, followerslist, cursor):
+        #Recursively get followers
+        sleep(10)
+        while True:
+            try:
+                d=self.twython.getFollowersIDs(screen_name=name, cursor=str(cursor))
+                cursor=d["next_cursor"]
+                break
+            except Exception as detail:
+                print "Some Twitter error: " + str(detail)
+                print name
+                print str(cursor)
+                if ("The URI requested is invalid" in str(detail)) or ("Unauthorized" in str(detail)):
+                    print name
+                    cursor=-1
+                    return followerslist
+                else:
+                    sleep(300)
+
+
+
+        followerslist=followerslist+d["ids"]
+        if cursor>0:
+            sleep(10)
+            followerslist=self.getFollowers(name, followerslist, cursor)
+        else:
+            return followerslist
+
+    def getFriends(self, name, friendslist, cursor):
+        #Recursively get followers
+        sleep(10)
+        while True:
+            try:
+                d=self.twython.getFriendsIDs(screen_name=name, cursor=str(cursor))
+                cursor=d["next_cursor"]
+                break
+            except Exception as detail:
+                print "Some Twitter error: " + str(detail)
+                print name
+                print str(cursor)
+                if ("The URI requested is invalid" in str(detail)) or ("Unauthorized" in str(detail)):
+                    print name
+                    cursor=-1
+                    return friendslist
+                else:
+                    sleep(300)
+
+        friendslist=friendslist+d["ids"]
+        if cursor>0:
+            sleep(10)
+            friendslist=self.getFriends(name, friendslist, cursor)
+        else:
+            return friendslist
+        

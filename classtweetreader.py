@@ -1,6 +1,8 @@
 import pickle
 import operator
 import string
+from twython import Twython
+
 
 class TweetReader(object):
     def __init__(self, filename):
@@ -39,11 +41,19 @@ class TweetReader(object):
         #Make sorted representation
         sorteddict = sorted(worddict.iteritems(), key=operator.itemgetter(1))
         print sorteddict
+        return worddict
 
     def printHashtagCount(self, minimum=0):
         hashtagdict={}
+
         for item in self.twitterdict.keys():
-            for hashtag in self.twitterdict[item]["hashtags"]:
+            nonduplist=[]
+            for htag in self.twitterdict[item]["hashtags"]:
+                if not (htag in nonduplist):
+                    nonduplist.append(htag)
+
+            
+            for hashtag in nonduplist:
                 try:
                     hashtagdict[hashtag]+=1
                 except:
@@ -52,9 +62,9 @@ class TweetReader(object):
         for item in hashtagdict.items():
             if item[1]<minimum:
                 del hashtagdict[item[0]]
-
         sorteddict = sorted(hashtagdict.iteritems(), key=operator.itemgetter(1))
         print sorteddict
+        return hashtagdict
         
     def getRetweets(self):
 
@@ -100,5 +110,11 @@ class TweetReader(object):
             if item[1]<minimum:
                 del usersdict[item[0]]
 
-        sorteddict = sorted(usersdict.iteritems(), key=operator.itemgetter(1))
-        print sorteddict    
+        return usersdict
+
+
+    def sortDict(self, dict1):
+        sorteddict = sorted(dict1.iteritems(), key=operator.itemgetter(1))
+        return sorteddict
+
+
