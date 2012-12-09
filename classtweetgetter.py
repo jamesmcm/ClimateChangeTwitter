@@ -78,22 +78,27 @@ class TweetGetter(object):
                 
 
             print str(ntweets)
-            self.save()
             sleep(10)
+            
+        self.save()
 
     def save(self):
         now = datetime.datetime.now()
         timestr=now.strftime("%d_%m_%H%M")
-        fname="twitterdata_query="+self.query+"_time="+timestr+"_lastid="+str(self.maxid)+".pkl"
+        query=self.query.replace('"', "")
+        query=query.replace("'", "")
+        query=query.replace(" ", "_")
+        fname="twitterdata_query="+query+"_time="+timestr+"_lastid="+str(self.maxid)+".pkl"
+        self.savedname=fname
         picklefile=open(fname, "w")
         pickle.dump(self.twitterdict,picklefile)
         picklefile.close()
-        if self.filename!=None:
-            try:
-                os.remove(self.filename)
-            except Exception as detail:
-                print "Unable to remove file: " + str(self.filename)+". Error message: " +str(detail)
-        self.filename=fname
+        # if self.filename!=None:
+        #     try:
+        #         os.remove(self.filename)
+        #     except Exception as detail:
+        #         print "Unable to remove file: " + str(self.filename)+". Error message: " +str(detail)
+        # self.filename=fname
                 
         
 
@@ -110,6 +115,7 @@ class TweetGetter(object):
         # }
         # while ( cursor != 0 )
         userslist=[]
+        j=0
         for item in self.twitterdict.keys():
             name=self.twitterdict[item]["screen_name"]
             if (not (name in userslist)):
@@ -117,16 +123,76 @@ class TweetGetter(object):
 
         if userdict==None:
             userdict={}
-        #print userslist
+
+        l = len(userslist)
+        fname="usersdict_"+self.filename
         for name in userslist:
             if (not (name in userdict.keys())):
                 followerslist=self.getFollowers(name, [], -1)
                 friendslist=self.getFriends(name, [], -1)
                 userdict[name]={"screen_name":name, "followers_list":followerslist, "friends_list":friendslist}
-                fname="usersdict_"+self.filename
+                
+
+            else:
+                #Check for new followers, repair possible failures
+                try:
+                    followerslist=self.getFollowers(name, userdict[name]["followers_list"], -1)
+                except KeyError:
+                    followerslist=self.getFollowers(name, [], -1)
+                try:
+                    friendslist=self.getFriends(name, userdict[name]["friends_list"], -1)
+                except KeyError:
+                    friendslist=self.getFriends(name, [], -1)
+                    
+                userdict[name]={"screen_name":name, "followers_list":followerslist, "friends_list":friendslist}
+            j+=1
+            now = datetime.datetime.now()
+            timestr=now.strftime("%d_%m_%H%M")
+            print "["+timestr+"] "+ name + ": " + str(j) + "/" + str(l)
+            if j%100==0:
                 picklefile=open(fname, "w")
                 pickle.dump(userdict,picklefile)
                 picklefile.close()
+
+        picklefile=open(fname, "w")
+        pickle.dump(userdict,picklefile)
+        picklefile.close()
+        
+
+        return userdict
+
+
+    def fastRepairUserDB(self, userdict):
+        #Want to repair None entries in dictionary
+        userslist=[]
+        j=0
+        for item in userdict.keys():
+            if ( (userdict[item]["followers_list"]==None) or (userdict[item]["friends_list"]==None)):
+                userslist.append(item)
+
+        l = len(userslist)
+        fname="usersdict_"+self.filename
+        for name in userslist:
+            followerslist=self.getFollowers(name, [], -1)
+            print len(followerslist)
+            friendslist=self.getFriends(name, [], -1)
+
+            if followerslist == None:
+                print "Followers BROKEN! " + str(name)
+            if friendslist==None:
+                print "Friends BROKEN! " + str(name)
+                    
+            userdict[name]={"screen_name":name, "followers_list":followerslist, "friends_list":friendslist}
+            j+=1
+            print name + ": " + str(j) + "/" + str(l)
+            if j%100==0:
+                picklefile=open(fname, "w")
+                pickle.dump(userdict,picklefile)
+                picklefile.close()
+
+        picklefile=open(fname, "w")
+        pickle.dump(userdict,picklefile)
+        picklefile.close()
         
 
         return userdict
@@ -139,39 +205,55 @@ class TweetGetter(object):
     
     def getFollowers(self, name, followerslist, cursor):
         #Recursively get followers
-        sleep(10)
+        sleep(7)
+        #print "Getting Followers:" + name
         while True:
             try:
                 d=self.twython.getFollowersIDs(screen_name=name, cursor=str(cursor))
                 cursor=d["next_cursor"]
+                #print str(cursor)
                 break
             except Exception as detail:
                 print "Some Twitter error: " + str(detail)
                 print name
                 print str(cursor)
                 if ("The URI requested is invalid" in str(detail)) or ("Unauthorized" in str(detail)):
-                    print name
                     cursor=-1
                     return followerslist
                 else:
                     sleep(300)
 
-
+        # if ((followerslist != []) and (followerslist !=None)):
+        #     for item in d["ids"]:
+        #         if ( not (item in followerslist)):
+        #             followerslist = followerslist + [item]
+        #         else:
+        #             cursor=-1
+        #             break
+        # elif followerslist == []:
+        #     followerslist=followerslist+d["ids"]
+        # elif followerslist==None:
+        #     followerslist=d["ids"]
 
         followerslist=followerslist+d["ids"]
+        # print name + ": " +str(len(followerslist))
+
+            
         if cursor>0:
-            sleep(10)
+            sleep(7)
             followerslist=self.getFollowers(name, followerslist, cursor)
-        else:
-            return followerslist
+        # print len(followerslist)
+        return followerslist
 
     def getFriends(self, name, friendslist, cursor):
         #Recursively get followers
-        sleep(10)
+        sleep(7)
+        #print "Getting Friends:" + name
         while True:
             try:
                 d=self.twython.getFriendsIDs(screen_name=name, cursor=str(cursor))
                 cursor=d["next_cursor"]
+                #print str(cursor)
                 break
             except Exception as detail:
                 print "Some Twitter error: " + str(detail)
@@ -184,10 +266,24 @@ class TweetGetter(object):
                 else:
                     sleep(300)
 
+        # if ((friendslist != []) and (friendslist !=None)):
+        #     for item in d["ids"]:
+        #         if ( not (item in friendslist)):
+        #             friendslist = friendslist + [item]
+        #         else:
+        #             cursor=-1
+        #             break
+        # elif friendslist == []:
+        #     friendslist=friendslist+d["ids"]
+        # elif friendslist==None:
+        #     friendslist=d["ids"]
+
         friendslist=friendslist+d["ids"]
+                    
+
         if cursor>0:
-            sleep(10)
+            sleep(7)
             friendslist=self.getFriends(name, friendslist, cursor)
-        else:
-            return friendslist
+        # else:
+        return friendslist
         

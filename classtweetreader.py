@@ -5,10 +5,14 @@ from twython import Twython
 
 
 class TweetReader(object):
-    def __init__(self, filename):
-        picklefile=open(filename,"r")
-        self.twitterdict=pickle.load(picklefile)
-        picklefile.close()
+    def __init__(self, filename=None, dict=None):
+        if filename==None and dict!=None:
+            self.twitterdict=dict
+        else:
+            picklefile=open(filename,"r")
+            self.twitterdict=pickle.load(picklefile)
+            self.filename=filename
+            picklefile.close()
         self.valid_characters = string.ascii_letters
         self.valid_characters += string.digits
         self.valid_characters += '_'
@@ -112,9 +116,35 @@ class TweetReader(object):
 
         return usersdict
 
+    def purgeDead(self, userdict):
+        for item in self.twitterdict.keys():
+            if not ( self.twitterdict[item]["screen_name"] in userdict.keys()):
+                del self.twitterdict[item]
+
 
     def sortDict(self, dict1):
         sorteddict = sorted(dict1.iteritems(), key=operator.itemgetter(1))
         return sorteddict
 
+
+    def save(self, filename=None):
+        if filename==None:
+            filename=self.filename
+        
+        picklefile=open(filename,"w")
+        pickle.dump(self.twitterdict,picklefile)
+        picklefile.close()
+
+    def loadDict(self, filename):
+        pfile=open(filename, "r")
+        dict=pickle.load(pfile)
+        pfile.close()
+        return dict
+
+    def getUserIDMap(self):
+        idmap={}
+        for item in self.twitterdict.keys():
+            idmap[self.twitterdict[item]["user_id_str"]]=self.twitterdict[item]["screen_name"]
+
+        return idmap
 
