@@ -97,7 +97,7 @@ class TweetReader(object):
                             keepgoing=False
                             endindex=i
 
-                    returnlist.append({"text":s,"screen_name": self.twitterdict[item]["screen_name"], "created_at": self.twitterdict[item]["created_at"], "source_screen_name":s[atindex+1:atindex+endindex]})
+                    returnlist.append({"text":s[atindex+endindex+1:],"screen_name": self.twitterdict[item]["screen_name"], "created_at": self.twitterdict[item]["created_at"], "source_screen_name":s[atindex+1:atindex+endindex], "id_str":str(item)})
 
         return returnlist
 
@@ -145,6 +145,19 @@ class TweetReader(object):
         idmap={}
         for item in self.twitterdict.keys():
             idmap[self.twitterdict[item]["user_id_str"]]=self.twitterdict[item]["screen_name"]
-
         return idmap
+
+    def getScreenNameMap(self):
+        idmap={}
+        for item in self.twitterdict.keys():
+            idmap[self.twitterdict[item]["screen_name"]]=self.twitterdict[item]["user_id_str"]
+        return idmap
+
+    def convertTime(self, timestring):
+        #Fri Nov 16 22:31:39 +0000 2012
+        lts=timestring.split(" ")
+        tt=lts[3].split(":")
+        monthdict={"Jan":1, "Feb":2, "Mar":3, "Apr":4, "May":5, "Jun":6, "Jul":7, "Aug":8, "Sep":9, "Oct":10, "Nov":11, "Dec":12}
+        dt=datetime.datetime(int(lts[5]), int(monthdict[lts[1]]), int(lts[2]),int(tt[0]),int(tt[1]),int(tt[2]))
+        return int(time.mktime(dt.timetuple()))
 

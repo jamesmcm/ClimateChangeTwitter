@@ -1,9 +1,9 @@
 from classtweetgetter import TweetGetter
-from classtweetreader import TweetReader
+#from classtweetreader import TweetReader
 
 
 myTweets=TweetGetter()
-myTweets.query('#climate',160000, False)
+myTweets.query('#socialism',160000, False)
 
 #Write log file
 # with open("GlobalWarming.txt", "a") as myfile:

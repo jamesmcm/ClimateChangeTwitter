@@ -49,6 +49,7 @@ class TweetGetter(object):
                             mentionslist=[]
                             hashtagslist=[]
                             urlslist=[]
+                            shorturlslist=[]
                             text=item["text"].replace(unichr(8220),'"')
                             text=item["text"].replace(unichr(8221),'"')
 
@@ -59,9 +60,12 @@ class TweetGetter(object):
                                 hashtagslist.append(x["text"].lower())
 
                             for x in item["entities"]["urls"]:
-                                hashtagslist.append(x["expanded_url"])
+                                urlslist.append(x["expanded_url"])
+                                
+                            for x in item["entities"]["urls"]:
+                                shorturlslist.append(x["url"])
 
-                            self.twitterdict[item["id_str"]]={"screen_name":item["user"]["screen_name"], "name":item["user"]["name"], "user_id_str":item["user"]["id_str"], "user_mentions":mentionslist, "hashtags":hashtagslist, "urls":urlslist, "id_str":item["id_str"], "created_at":item["created_at"], "text":text, "followers_count":item["user"]["followers_count"], "friends_count":item["user"]["friends_count"], "statuses_count":item["user"]["statuses_count"], "retweet_count":item["retweet_count"],"in_reply_to_status_id_str":item["in_reply_to_status_id_str"], "in_reply_to_user_id_str":item["in_reply_to_user_id_str"], "truncated":item["truncated"], "retweeted":item["retweeted"]}
+                            self.twitterdict[item["id_str"]]={"screen_name":item["user"]["screen_name"], "name":item["user"]["name"], "user_id_str":item["user"]["id_str"], "user_mentions":mentionslist, "hashtags":hashtagslist, "urls":urlslist, "short_urls":shorturlslist, "id_str":item["id_str"], "created_at":item["created_at"], "text":text, "followers_count":item["user"]["followers_count"], "friends_count":item["user"]["friends_count"], "statuses_count":item["user"]["statuses_count"], "retweet_count":item["retweet_count"],"in_reply_to_status_id_str":item["in_reply_to_status_id_str"], "in_reply_to_user_id_str":item["in_reply_to_user_id_str"], "truncated":item["truncated"], "retweeted":item["retweeted"]}
                             ntweets+=1
                         else:
                             nmatch+=1
