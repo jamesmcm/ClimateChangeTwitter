@@ -2,7 +2,7 @@ from classtweetgetter import TweetGetter
 from classtweetreader import TweetReader
 import datetime
 
-myTweets=TweetGetter("twitterdata_query=#globalwarming_time=04_01_0108_lastid=285923024996286463.pkl")
+myTweets=TweetGetter("twitterdata_query=#globalwarming_time=17_01_0527_lastid=290344119115583489.pkl")
 myTweets.query('#globalwarming',160000, False)
 
 #Write log file
