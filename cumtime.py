@@ -25,22 +25,65 @@ tend='Wed May 29 00:00:00 +0000 2013'
 ct=1358090418
 ctm=1358090418
 
-ctend=convertTime(tend)
-usernums=[]
-times=[]
-while ct<ctend:
-    cur.execute("SELECT DISTINCT ScreenName FROM htglobalwarming WHERE ConvertedTime < " + str(ct) + " AND ConvertedTime > " + str(ctm))
-    d=cur.fetchall()
-    usernums.append(len(d))
-    times.append(ct)
-    ct+=86400
+def cumusers(tablename):
+	global ct
+	global ctm	
+	ctend=convertTime(tend)
+	usernums=[]
+	times=[]
+	while ct<ctend:
+	    cur.execute("SELECT DISTINCT ScreenName FROM "+tablename+" WHERE ConvertedTime < " + str(ct) + " AND ConvertedTime > " + str(ctm))
+	    d=cur.fetchall()
+	    usernums.append(len(d))
+	    times.append(ct)
+	    ct+=86400
 
-print len(times)
-f=open("usernumdatahtgw2.txt","w")
-for i in range(len(usernums)):
-    f.write(str(times[i]) + "\t"+ str(usernums[i])+"\n")
-f.close()
+	print len(times)
+	f=open("usernumdata"+tablename+"3.txt","w")
+	for i in range(len(usernums)):
+	    f.write(str(times[i]) + "\t"+ str(usernums[i])+"\n")
+	f.close()
 
+def cumtweets(tablename):
+	global ct
+	global ctm
+	ctend=convertTime(tend)
+	usernums=[]
+	times=[]
+	while ct<ctend:
+	    cur.execute("SELECT DISTINCT Id FROM "+tablename+" WHERE ConvertedTime < " + str(ct) + " AND ConvertedTime > " + str(ctm))
+	    d=cur.fetchall()
+	    usernums.append(len(d))
+	    times.append(ct)
+	    ct+=86400
+
+	print len(times)
+	f=open("tweetnumdata"+tablename+"3.txt","w")
+	for i in range(len(usernums)):
+	    f.write(str(times[i]) + "\t"+ str(usernums[i])+"\n")
+	f.close()
+
+def activity(tablename):
+	global ct
+	global ctm
+	
+	ct+=86400
+	ctend=convertTime(tend)
+	usernums=[]
+	times=[]
+	while ct<ctend:
+	    cur.execute("SELECT DISTINCT Id FROM "+tablename+" WHERE ConvertedTime < " + str(ct) + " AND ConvertedTime > " + str(ctm))
+	    d=cur.fetchall()
+	    usernums.append(len(d))
+	    times.append(ct)
+	    ct+=86400
+	    ctm+=86400
+
+	print len(times)
+	f=open("acttweetdata"+tablename+"3.txt","w")
+	for i in range(len(usernums)):
+	    f.write(str(times[i]) + "\t"+ str(usernums[i])+"\n")
+	f.close()
 
 #To get cumulative tweet number
 # cur.execute("SELECT ConvertedTime FROM htclimatechange")
@@ -74,3 +117,4 @@ f.close()
 # dat1 <- read.table("cumtimedata.dat")
 # cdat1 <- cumsum(dat1$V2)
 # plot(dat1$V1, cdat1)
+cumtweets("htclimatechange")

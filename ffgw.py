@@ -263,7 +263,7 @@ def dbplotffnetwork():
     #Plot following/follower network
     #restrict to those with 3 tweets or more
     mintime=1358090418
-    maxtime=1363963163
+    maxtime=1369923484
     mygetter=DBTweetGetter(None,None)
     con = lite.connect("tweetsdb.db")
     cur=con.cursor()
@@ -278,7 +278,7 @@ def dbplotffnetwork():
         tusers.append(item[0].lower())
     for item in tusers:
         if not (item in users):
-            if tusers.count(item)>7:
+            if tusers.count(item)>12:
                 users.append(item)
 
     print len(users)
@@ -297,7 +297,7 @@ def dbplotffnetwork():
     # print len(users)
 
 
-    # cur.execute("SELECT ScreenName FROM htagw WHERE ConvertedTime > "+str(mintime) + " COLLATE NOCASE")
+    # cur.execute("SELECT ScreenName FROM htagw WHERE ConvertedTime > "+str(mintime) + " AND ConvertedTime < " + str(maxtime) +" COLLATE NOCASE")
     # temp=cur.fetchall()
     # tusers=[]
     # for item in temp:
@@ -310,7 +310,7 @@ def dbplotffnetwork():
     # print len(users)
 
 
-    #aim for 380
+    # #aim for 380
     #sys.exit("Hammertime")
     i=0
     try:
@@ -404,7 +404,7 @@ def dbplotffnetwork():
                         graph.add_edge(user.lower(), other.lower())
 
     print "Built graph"
-    nx.write_gml(graph, "newfriendfollowerhtccgt29.gml")
+    nx.write_gml(graph, "newfriendfollowerhtgwgt12.gml")
     ucon.commit()
     con.close()
     ucon.close()
@@ -474,5 +474,5 @@ def dbconversation(tablename):
 #plotffnetwork("twitterdata_query=#climatechange_time=21_11_1741_lastid=269835693721792511.pkl", "usersdict_twitterdata_query=#climatechange_time=21_11_1741_lastid=269835693721792511.pkl")
 #retweetplot("twitterdata_query=#climatechange_time=21_11_1741_lastid=269835693721792511.pkl", "usersdict_twitterdata_query=#climatechange_time=21_11_1741_lastid=269835693721792511.pkl")
 #dbplotnaivertnetwork("tweetsdb.db", "htagw")
-#dbplotffnetwork()
-dbconversation("htglobalwarming")
+dbplotffnetwork()
+#dbconversation("htglobalwarming")

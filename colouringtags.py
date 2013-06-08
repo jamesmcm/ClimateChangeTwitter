@@ -3,6 +3,7 @@
 #Go through GML file, put all users in clusters - either activist, skeptic or not tagged or neither
 #Currently: G: Skeptic, A: Activist, L:Other, X: Untagged
 import sys
+gmlf="newconvhtglobalwarmingnortdir.gml"
 
 d={}
 f=open("usertags.txt","r")
@@ -17,7 +18,7 @@ f.close()
 #Successfully loaded dictionary
 
 #Parse GML
-f=open("naivertnewhtclimatechange.gml","r")
+f=open(gmlf,"r")
 gml=f.read()
 f.close()
 
@@ -34,6 +35,6 @@ while lind != -1:
     gml=gml[:fn+2]+'    HC2 "' + val + '"\n'+gml[fn+2:]
     lind=gml.find("label",fn)
 
-f=open("taggednaivertnewhtclimatechange.gml", "w")
+f=open("tagged"+gmlf, "w")
 f.write(gml)
 f.close()

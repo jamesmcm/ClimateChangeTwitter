@@ -62,7 +62,7 @@ class DBTweetGetter(object):
             print "Error loading Twython object. Error message: " + str(detail)
             raise Exception(detail)
 
-    def query(self,query,numtweets=16000, usemaxid=True):
+    def query(self,query,numtweets=160000, usemaxid=True):
         if usemaxid==False:
             self.maxid=None
         self.query=query
@@ -119,6 +119,87 @@ class DBTweetGetter(object):
                                 self.screened.append(item["user"]["screen_name"])
 
                             self.con.execute("INSERT INTO "+self.tablename+" VALUES("+str(item["id_str"])+","+escapes(repr(item["user"]["screen_name"])[1:])+","+escapes(repr(item["user"]["name"])[1:])+","+escapes(repr(text)[1:])+",'"+item["created_at"]+"',"+str(item["retweet_count"]) +","+str(fixnone(item["in_reply_to_status_id_str"]))+","+str(fixnone(item["in_reply_to_user_id_str"])) +"," + str(convertbool(item["truncated"])) +","+str(convertbool(item["retweeted"])) +","+str(item["user"]["friends_count"]) +"," + str(item["user"]["followers_count"]) + "," + isretweet +","+ escapes(repr(source)[1:]) +","+ctime+"," +escapes(repr(tweet)[1:]) + ")" )
+
+
+                            ntweets+=1
+                        else:
+                            nmatch+=1
+                            if nmatch>3:
+                                print "Grabbing old tweets, stopping."
+                                ntweets=numtweets+1
+                        
+                else:
+                    print "Cannot obtain more tweets"
+                    ntweets=numtweets+1
+            except Exception as detail:
+                print "Some Twitter error: " + str(detail)
+                sleep(300)
+                
+
+            print str(ntweets)
+            sleep(10)
+        self.con.commit()
+        self.con.close()
+        self.ucon.commit()
+        self.ucon.close()
+
+    def query2(self,query,numtweets=160000, usemaxid=True):
+        if usemaxid==False:
+            self.maxid=None
+        self.query=query
+        ntweets=0
+        nmatch=0
+        while ntweets<numtweets:
+            try:
+                if self.maxid!=None:
+                    mydict=self.twython.search(q=query, result_type="recent", count="100", max_id=str(self.maxid))
+                else:
+                    mydict=self.twython.search(q=query, result_type="recent", count="100")
+
+                actualcount=len(mydict["statuses"])
+                if actualcount != 0:
+                    
+                    self.maxid=int(mydict["statuses"][actualcount-1]["id_str"])-1 #int at the moment
+
+                    for item in mydict["statuses"]:
+                        
+                        if (not (int(item["id_str"]) in self.idlist)):
+                            text=item["text"].replace(unichr(8220),'"')
+                            text=text.replace(unichr(8221),'"')
+                            ctime=str(self.convertTime(item["created_at"]))
+                            isretweet="0"
+                            source=u"-"
+                            tweet=u"-"
+                            if text[0:2] == "RT":
+                                isretweet="1"
+                                s=text
+                                try:
+                                    atindex=s.index("@")
+                                    breakif=False
+                                except:
+                                    breakif=True
+
+                                if breakif==False:
+                                    keepgoing=True
+                                    i=1
+                                    while keepgoing==True:
+                                        try:
+                                            if not (s[atindex+i] in valid_characters):
+                                                keepgoing=False
+                                                endindex=i
+                                            else:
+                                                i+=1
+                                        except:
+                                            keepgoing=False
+                                            endindex=i
+                                    source=s[atindex+1:atindex+endindex]
+                                    tweet=s[atindex+endindex+1:]
+
+                            if not (item["user"]["screen_name"] in self.screened):
+                                self.ucur.execute("INSERT INTO usermap VALUES('" + item["user"]["screen_name"]  + "'," + item["user"]["id_str"] + ")" )
+                                self.screened.append(item["user"]["screen_name"])
+
+                            self.con.execute("INSERT INTO "+self.tablename+" VALUES("+str(item["id_str"])+","+escapes(repr(item["user"]["screen_name"])[1:])+","+str(item["user"]["id_str"])+","+escapes(repr(item["user"]["name"])[1:])+","+escapes(repr(text)[1:])+",'"+item["created_at"]+"',"+str(item["retweet_count"]) +","+str(fixnone(item["in_reply_to_status_id_str"]))+","+str(fixnone(item["in_reply_to_user_id_str"])) +"," + str(convertbool(item["truncated"])) +","+str(convertbool(item["retweeted"])) +","+str(item["user"]["friends_count"]) +"," + str(item["user"]["followers_count"]) + "," + isretweet +","+ escapes(repr(source)[1:]) +","+ctime+"," +escapes(repr(tweet)[1:]) + ")" )
 
 
                             ntweets+=1
