@@ -24,6 +24,60 @@ def countrecords():
     print t
     print l
 
+def countretweets():
+    l=[]
+    t=0
+    cur.execute("SELECT COUNT(*) FROM htglobalwarming WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=1")
+    d=cur.fetchall()
+    t+=d[0][0]
+    l.append(d[0][0])
+    cur.execute("SELECT COUNT(*) FROM htclimatechange WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=1")
+    d=cur.fetchall()
+    t+=d[0][0]
+    l.append(d[0][0])
+    cur.execute("SELECT COUNT(*) FROM htagw WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=1")
+    d=cur.fetchall()
+    t+=d[0][0]
+    l.append(d[0][0])
+    print t
+    print l
+
+
+def countmentions():
+    l=[]
+    t=0
+    cur.execute("SELECT Tweet FROM htglobalwarming WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=0")
+    d=cur.fetchall()
+    c=0
+    for item in d:
+        if ("@" in item[0]) and (not ("RT:" in item[0])):
+            c+=1
+            t+=1
+    l.append(c)
+    cur.execute("SELECT Tweet FROM htclimatechange WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=0")
+    d=cur.fetchall()
+    c=0
+    for item in d:
+        if ("@" in item[0]) and (not ("RT:" in item[0])):
+            c+=1
+            t+=1
+    l.append(c)
+    cur.execute("SELECT Tweet FROM htagw WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) +" AND IsRetweet=0")
+    d=cur.fetchall()
+    c=0
+    for item in d:
+        if ("@" in item[0]) and (not ("RT:" in item[0])):
+            c+=1
+            t+=1
+    l.append(c)
+    print t
+    print l
+
+
+
+
+    
+
 def countusers():
     t=0
     l=[]
@@ -120,7 +174,9 @@ if __name__ == "__main__":
     #countrecords()
     #calcoverlaptweets()
     countrecords()
-    countusers()
-    calcgini3(tweetsperuser("htclimatechange"))
-    calcgini3(tweetsperuser("htglobalwarming"))
-    calcgini3(tweetsperuser("htagw"))
+    countretweets()
+    countmentions()
+    #countusers()
+    #calcgini3(tweetsperuser("htclimatechange"))
+    #calcgini3(tweetsperuser("htglobalwarming"))
+    #calcgini3(tweetsperuser("htagw"))

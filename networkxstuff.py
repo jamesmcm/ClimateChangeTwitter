@@ -434,7 +434,7 @@ def dbconversation(tablename):
     for item in d:
         #print "Tweet " +str(z)+"/"+str(lz)
         z+=1
-        if ("@" in item[0].lower()) and ("RT:" not in item[0].lower()):
+        if ("@" in item[0].lower()) and ("rt:" not in item[0].lower()):
             #Continue until character not in valid set, then check if is user in set
             #First count number of @s
             names=[]

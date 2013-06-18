@@ -38,6 +38,10 @@ def escapes(s):
     return s
 
 class DBTweetGetter(object):
+    """ 
+    This class gets the tweets and stores them in the database. 
+    query(query,numtweets=160000, usemaxid=True) is responsible for actually downloading the tweets. The IDs of the downloaded tweets are checked in the initialisation of the class, and query checks against this to know when it has downloaded all of the most recent, unseen tweets.
+    """
     def __init__(self, filename, tablename):
         if filename!=None:
             self.con = lite.connect(filename)
@@ -144,6 +148,7 @@ class DBTweetGetter(object):
         self.ucon.close()
 
     def query2(self,query,numtweets=160000, usemaxid=True):
+        #Used to get tweets for new IPCC hashtags, to add in the userID which was omitted in the previous database by mistake
         if usemaxid==False:
             self.maxid=None
         self.query=query
@@ -268,13 +273,14 @@ class DBTweetGetter(object):
                     return "FAIL"
                 elif "suspended" in str(detail):
                     print "Some Twitter error: " + str(detail)
-                    gotry=True
-                    sleep(6000)
+                    #sleep(300)
+                    return "FAIL"
+
                 else:
                     print "Some Twitter error: " + str(detail)
                     gotry=True
                     sleep(300)
-        sleep(10)
+        sleep(60)
         return d["description"]
 
     # def getUserfromID(self,idn):

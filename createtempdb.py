@@ -19,8 +19,8 @@ tcur=tcon.cursor()
 mintime=1358090418
 con=lite.connect("diffuserslastdb.db")
 cur=con.cursor()
-cur.execute("CREATE TABLE tweets(ScreenName TEXT, Tweet TEXT)")
-cur.execute("CREATE TABLE descriptions(ScreenName TEXT, Description TEXT)")
+#cur.execute("CREATE TABLE tweets(ScreenName TEXT, Tweet TEXT)")
+#cur.execute("CREATE TABLE descriptions(ScreenName TEXT, Description TEXT)")
 
 mytweetgetter=DBTweetGetter(None, None)
 
