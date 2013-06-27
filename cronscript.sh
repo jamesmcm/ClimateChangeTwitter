@@ -1,1 +1,0 @@
-python gettweetsClimateChange.py && python gettweets#climatechange.py && python gettweets#globalwarming.py && python gettweetsGlobalWarming.py && python gettweets#climate.py

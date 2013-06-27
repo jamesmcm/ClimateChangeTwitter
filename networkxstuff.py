@@ -2,9 +2,7 @@ import sqlite3 as lite
 import sys
 import networkx as nx
 import pickle
-from classtweetreader import TweetReader
 import matplotlib.pyplot as plt
-from classtweetgetter import TweetGetter
 from classtweetgetter import DBTweetGetter
 from time import sleep
 import string
@@ -45,167 +43,6 @@ valid_characters += '_'
 # Perhaps just visit URL then get final URL, strip of # tags
 # Remove any # markers from URL
 # http://grist.org/news/if-youre-27-or-younger-youve-never-experienced-a-colder-than-average-month/#.UKeZolfmFBx.twitter
-def retweetplot(twitterdictfilename, userdictfilename):
-    myreader=TweetReader(twitterdictfilename)
-    mygetter=TweetGetter()
-    usersdict=myreader.loadDict(userdictfilename)
-    myreader.purgeDead(usersdict)
-    #restrict to those with 3 tweets or more
-    usernamesdict=myreader.getUsernames()
-    idmap=myreader.getUserIDMap()
-    screenmap=myreader.getScreenNameMap()
-    #retweetlist=myreader.getRetweets()
-    #print idmap
-    graph=nx.DiGraph()
-    subdict={}
-    unknownlist=[]
-    for item in myreader.twitterdict.keys():
-        if ("colder" in myreader.twitterdict[item]["text"]) and ("month" in myreader.twitterdict[item]["text"]):
-            subdict[item]=myreader.twitterdict[item]
-            subdict[item]["converted_time"]=myreader.convertTime(myreader.twitterdict[item]["created_at"])
-            #myreader.convertTime(timestring)
-
-
-        #Get user IDs for unknown source usernames to check following status
-    for item in subdict.keys():
-        if subdict[item]["text"][0:2] == "RT":
-            s=subdict[item]["text"]
-            #print s
-
-            try:
-                atindex=s.index("@")
-                breakif=False
-            except:
-                breakif=True
-            # TODO
-            if breakif==False:
-                keepgoing=True
-                i=1
-                while keepgoing==True:
-                    try:
-                        if not (s[atindex+i] in myreader.valid_characters):
-                            keepgoing=False
-                            endindex=i
-                        else:
-                            i+=1
-                    except:
-                        keepgoing=False
-                        endindex=i
-
-            source_screen_name=s[atindex+1:atindex+endindex]
-            id_str=str(item)
-            text=s[atindex+endindex+1:]
-            screen_name= subdict[item]["screen_name"]
-            subdict[item]["retweet"]=True
-            subdict[item]["source_screen_name"]=source_screen_name
-            try:
-                sourceid=screenmap[source_screen_name]
-            except:
-                unknownlist.append(source_screen_name)
-        else:
-            subdict[item]["retweet"]=False
-            
-
-    print len(unknownlist)
-    print unknownlist
-    for name in unknownlist:
-            screenmap[name]=mygetter.getIDfromUser(name)
-            
-        
-
-    for item in subdict.keys():
-        graph.add_node(subdict[item]["screen_name"], time=subdict[item]["converted_time"])
-        #If non retweet just plot node.
-        #If retweet check if follows original source, if so create direct edge
-        #If not then look at closest tweets beforehand, see if they follow them
-        #Then do that tweet and so on
-        if subdict[item]["retweet"]==True:
-            source_screen_name=subdict[item]["source_screen_name"]
-            screen_name=subdict[item]["screen_name"]
-            #if original source then just plot direct edge
-
-            if int(screenmap[source_screen_name]) in usersdict[screen_name]["friends_list"]:
-                #Need id number of source's tweet
-                #TODO
-                # tweetidsource=-5
-                # for item2 in subdict.keys():
-                #     if ("colder" in subdict[item2]["text"]) and ("month" in subdict[item2]["text"]):
-                #         if subdict[item2]["user"]["screen_name"] == source_screen_name:
-                #             tweetidsource=item2
-                #             break
-                # if tweetidsource<0:
-                #     print "Do not have original source in data set for user: "+ str(screen_name) +" and source: " + str(source_screen_name) +"\n"
-                # else:
-                #     graph.add_edge(tweetidsource, item)
-                graph.add_edge(source_screen_name, screen_name, time=subdict[item]["converted_time"])
-
-            else:
-                edgenum=0
-                #The hard part, need to convert all times (do this earlier?) find most recent, check against users, repeat
-                mintime=subdict[item]["converted_time"]
-                for item2 in subdict.keys():
-                    if (subdict[item2]["converted_time"]<mintime) and (subdict[item2]["retweet"]==True):
-                        if subdict[item2]["source_screen_name"]==source_screen_name:
-                            if int(screenmap[subdict[item2]["screen_name"]]) in usersdict[subdict[item]["screen_name"]]["friends_list"]:
-                                graph.add_edge(subdict[item2]["screen_name"], subdict[item]["screen_name"] ,time=subdict[item]["converted_time"])
-                                edgenum+=1
-                if edgenum==0:
-                    print "Intermediaries not found for user: " + screen_name + ", source: " + source_screen_name +".\n"
-                    graph.add_edge(source_screen_name, screen_name, time=subdict[item]["converted_time"])
-
-
-    print "Built graph"
-    nx.write_gml(graph, "testrt2.gml")
-    print "Wrote graph"
-
-    
-
-def plotffnetwork(twitterdictfilename, userdictfilename):
-    #Plot following/follower network
-    myreader=TweetReader(twitterdictfilename)
-    usersdict=myreader.loadDict(userdictfilename)
-    myreader.purgeDead(usersdict)
-    #restrict to those with 3 tweets or more
-    usernamesdict=myreader.getUsernames(minimum=10)
-    idmap=myreader.getUserIDMap()
-    #print idmap
-    graph=nx.DiGraph()
-    for name in usernamesdict.keys():
-        graph.add_node(name)
-        try:
-            for ids in usersdict[name]["followers_list"]:
-                #add follower
-                try:
-                    #print usersdict[name]["screen_name"]
-                    #print ids
-                    followername=idmap[str(ids)]
-                    if followername in usernamesdict.keys():
-                        graph.add_edge(name, followername)
-                    else:
-                        print "Name missing in dict: " + str(followername)
-                except:
-                    #User was not in our subset, probably better way of doing this
-                    pass
-
-            for ids in usersdict[name]["friends_list"]:
-                #add friend/following
-                try:
-                    friendname=idmap[str(ids)]
-                    if friendname in usernamesdict.keys():
-                        graph.add_edge(friendname,name)
-                    else:
-                        print "Name missing in dict: " + str(friendname)
-                except:
-                    #User was not in our subset, probably better way of doing this
-                    pass
-        except:
-            pass
-            #fix me later
-    print "Built graph"
-    nx.write_gml(graph, "friendfollower.gml")
-    print "Wrote graph"
-    # nx.draw(graph)
-    # plt.show()
 
 
 def dbplotnaivertnetwork(dbname,tablename):
@@ -232,30 +69,6 @@ def dbplotnaivertnetwork(dbname,tablename):
     # plt.show()
     # print "Shown graph"
 
-
-def plotnaivertnetwork(twitterdictfilename):
-    #Plot naive retweet network i.e. retweeters to original source
-    myreader=TweetReader(twitterdictfilename)
-    print "Loaded tweets"
-    retweetlist=myreader.getRetweets()
-    print "Loaded retweets"
-    graph=nx.DiGraph()
-    for item in retweetlist:
-        try:
-            graph[item["source_screen_name"]][item["screen_name"]]['weight']+=1
-        except:
-            graph.add_edge(item["source_screen_name"], item["screen_name"], weight=1)
-
-    print "Built graph"
-    nx.write_gml(graph, "test.gml")
-    print "Wrote graph"
-    # nx.draw(graph)
-    # print "Drew graph"
-    # plt.savefig("test.png")
-    # print "Saved graph"
-    # plt.show()
-    # print "Shown graph"
-    
 
 
 def dbplotffnetwork():

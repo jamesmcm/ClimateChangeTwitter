@@ -1,4 +1,4 @@
-graphs=["tnewrthtccew8comp4.gml","tnewrthtagwew4comp4.gml","tnewrtgwew4comp4.gml","thtgwconvew4pc6.gml","thtccconvew4pc6.gml","thtagwconvew2pc6.gml"]
+graphs=["gwconvew2pc4fixlabels.gml"]
 
 for f in graphs:
     fi=open(f,"r")

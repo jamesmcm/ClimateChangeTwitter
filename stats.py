@@ -124,17 +124,19 @@ def calcoverlapusers():
     uagw=cur.fetchall()
 
     ccgw=set(ucc).intersection( set(ugw) )
-    print "Intersection between #climatechange and #globalwarming:"
-    print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
+    print "Users Intersection between #climatechange and #globalwarming:"
+    #print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
+    print str(len(ccgw))
 
     ccagw=set(ucc).intersection( set(uagw) )
-    print "Intersection between #climatechange and #agw:"
-    print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
-
+    print "Users Intersection between #climatechange and #agw:"
+    #print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
+    print str(len(ccagw))
+    
     gwagw=set(ugw).intersection( set(uagw) )
-    print "Intersection between #globalwarming and #agw:"
-    print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
-
+    print "Users Intersection between #globalwarming and #agw:"
+    #print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
+    print str(len(gwagw))
 def calcoverlaptweets():
     cur.execute("SELECT DISTINCT Id FROM htglobalwarming WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime))
     ugw=cur.fetchall()
@@ -144,17 +146,80 @@ def calcoverlaptweets():
     uagw=cur.fetchall()
 
     ccgw=set(ucc).intersection( set(ugw) )
-    print "Intersection between #climatechange and #globalwarming:"
-    print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
-
+    print "Tweets Intersection between #climatechange and #globalwarming:"
+    #print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
+    print str(len(ccgw))
+    
     ccagw=set(ucc).intersection( set(uagw) )
-    print "Intersection between #climatechange and #agw:"
-    print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
+    print "Tweets Intersection between #climatechange and #agw:"
+    #print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
+    print str(len(ccagw))
 
     gwagw=set(ugw).intersection( set(uagw) )
-    print "Intersection between #globalwarming and #agw:"
-    print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
+    print "Tweets Intersection between #globalwarming and #agw:"
+    #print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
+    print str(len(gwagw))
 
+def calcoverlapretweets():
+    cur.execute("SELECT DISTINCT Id FROM htglobalwarming WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=1")
+    ugw=cur.fetchall()
+    cur.execute("SELECT DISTINCT Id FROM htclimatechange WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=1")
+    ucc=cur.fetchall()
+    cur.execute("SELECT DISTINCT Id FROM htagw WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=1")
+    uagw=cur.fetchall()
+
+    ccgw=set(ucc).intersection( set(ugw) )
+    print "Retweets Intersection between #climatechange and #globalwarming:"
+    #print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
+    print str(len(ccgw))
+    
+    ccagw=set(ucc).intersection( set(uagw) )
+    print "Retweets Intersection between #climatechange and #agw:"
+    #print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
+    print str(len(ccagw))
+
+    gwagw=set(ugw).intersection( set(uagw) )
+    print "Retweets Intersection between #globalwarming and #agw:"
+    #print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
+    print str(len(gwagw))
+
+
+def calcoverlapmentions():
+    cur.execute("SELECT DISTINCT Id, Tweet FROM htglobalwarming WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=0")
+    ugwp=cur.fetchall()
+    cur.execute("SELECT DISTINCT Id, Tweet FROM htclimatechange WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=0")
+    uccp=cur.fetchall()
+    cur.execute("SELECT DISTINCT Id, Tweet FROM htagw WHERE ConvertedTime > " + str(ct) +" AND ConvertedTime < " + str(maxtime) + " AND IsRetweet=0")
+    uagwp=cur.fetchall()
+
+    ugw=[]
+    ucc=[]
+    uagw=[]
+    for item in ugwp:
+        if ("@" in item[1]) and (not ("RT:" in item[1])):
+            ugw.append(item[0])
+    for item in uccp:
+        if ("@" in item[1]) and (not ("RT:" in item[1])):
+            ucc.append(item[0])
+    for item in uagwp:
+        if ("@" in item[1]) and (not ("RT:" in item[1])):
+            uagw.append(item[0])
+
+
+    ccgw=set(ucc).intersection( set(ugw) )
+    print "Mentions Intersection between #climatechange and #globalwarming:"
+    #print str(len(ccgw))+"/"+str(len(ugw)+len(ucc)-len(ccgw)) +", " + str(float(float(len(ccgw))/(len(ugw)+len(ucc)-len(ccgw)))*100) + "%"
+    print str(len(ccgw))
+    
+    ccagw=set(ucc).intersection( set(uagw) )
+    print "Mentions Intersection between #climatechange and #agw:"
+    #print str(len(ccagw))+"/"+str(len(ucc)+len(uagw)-len(ccagw)) +", " + str(float(float(len(ccagw))/(len(ucc)+len(uagw)-len(ccagw)))*100) + "%"
+    print str(len(ccagw))
+
+    gwagw=set(ugw).intersection( set(uagw) )
+    print "Mentions Intersection between #globalwarming and #agw:"
+    #print str(len(gwagw))+"/"+str(len(ugw)+len(uagw)-len(gwagw)) +", " + str(float(float(len(gwagw))/(len(ugw)+len(uagw)-len(gwagw)))*100) + "%"
+    print str(len(gwagw))
 
 
 def calcgini3(l):
@@ -172,11 +237,14 @@ def calcgini3(l):
     
 if __name__ == "__main__":
     #countrecords()
-    #calcoverlaptweets()
+    countusers()
+    calcoverlapusers()    
     countrecords()
+    calcoverlaptweets()
     countretweets()
+    calcoverlapretweets()
     countmentions()
-    #countusers()
+    calcoverlapmentions()
     #calcgini3(tweetsperuser("htclimatechange"))
     #calcgini3(tweetsperuser("htglobalwarming"))
     #calcgini3(tweetsperuser("htagw"))

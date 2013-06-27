@@ -1,0 +1,228 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Example: Project Report
+%
+% Source: http://www.howtotex.com
+%
+% Feel free to distribute this example, but please keep the referral
+% to howtotex.com
+% Date: March 2011 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on thefi
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+% If you're new to LaTeX, the wikibook is a great place to start:
+% http://en.wikibooks.org/wiki/LaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the title below to update the display in My Documents
+%\title{Project Report}
+%
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{pbox}
+\usepackage{fullpage}
+
+
+%%% Custom sectioning
+\usepackage{sectsty}
+\allsectionsfont{\centering \normalfont\scshape}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot{}								% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{University Of Exeter} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge User guide for Twitter project\\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont 								\normalsize
+        James McMurray\\[-3pt]		\normalsize
+        \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+\section{Required software}
+
+All of the software used in the project is Free and Open Source Software, and is freely available for many platforms, from the Internet. The underlying software required is given in the following table:\\
+
+\begin{center}
+\begin{tabular}{| l | p{5cm} | p{7cm}|}
+\hline
+Python 2.7 & The software was written in the Python programming modules, using Twython for Python 2.7. &Included in Ubuntu by default, easily obtained for other operating systems.\\ \hline
+
+Sqlite3 & Sqlite3 was used to produce the databases. &This is included with Python by default.\\
+\hline
+Twython & The Twython module was used to obtain the data from the Twitter API. & This must be installed via the \emph{pip} package management system for python. Running \emph{sudo pip install twython} after installing \emph{pip} via your package manager should install the module.\\ \hline
+NetworkX & The NetworkX module was used to produce the GML files. & NetworkX can be installed via the \emph{pip} package management system.\\ \hline
+Gephi & Gephi was used to visualise the graphs (although other software could be used instead without any difficulty). & Gephi is available at \url{https://gephi.org/ }.\\ \hline
+\end{tabular}
+
+\end{center}
+\section{Database structure}
+{\bf tweetsdb.db}:\\
+
+The database file \emph{tweetsdb.db} contains the tables for the queries on \emph{\#climatechange}, \emph{\#climate}, \emph{\#globalwarming}, \emph{\#climaterealists},\emph{"Climate Change"}, \emph{"Global Warming"}, \emph{\#agw}.\\
+
+Tables: \emph{htagw, htclimatechange, htglobalwarming, htclimate, ClimateChange, GlobalWarming, htclimaterealists}\\
+Each table contains the tweets for that hashtag/query, all have the same structure.\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+Id & INT & Unique ID number of the tweet. \\
+ScreenName & TEXT & User name of the posting user. \\
+FullName & TEXT & Full name of the user (if given). \\
+Tweet & TEXT & Text of the tweet (sometimes truncated due to URLs, etc. added in) \\
+Timestamp & TEXT & Timestamp of the tweet in the form:  "Mon Jun 17 22:38:21 +0000 2013" \\
+RetweetCount & INT & Number of times this tweet has been retweeted.\\
+InReplyToStatusId & INT & If this tweet is a reply to a status, returns the ID number of that status. \\
+InReplyToUserId & INT & If this tweet is a reply, returns the ID of the user to whom the reply is.\\
+Truncated & INT & Always returns 0. \\
+Retweeted & INT & Always returns 0. \\
+FriendsCount & INT & Returns the number of users that the tweeting user is following, at the time of collecting the data.\\
+FollowersCount & INT & Returns the number of users that the are following the tweeting user, at the time of collecting the data.\ \\
+IsRetweet & INT & Field added by myself. Boolean 1 or 0 - whether the tweet is a retweet or not by checking for presence of "RT: @X".\\
+RetweetSource & TEXT & Field added by myself. Returns the username of the original source, if the tweet is a retweet, otherwise returns "-". \\
+ConvertedTime & INT & Field added by myself. The timestamp converted to UNIX time. \\
+RetweetTweet & TEXT & The text only of the Retweet (i.e. "RT: @X" removed) , if it is a retweet, otherwise "-".\\
+\end{tabular}\\
+\\
+
+{\bf userdb.db}:\\
+
+The user database \emph{userdb.db} contains a table of descriptions for many users, a table of followers for many users - where multiple records for the source user construct a list of followers, a table of friends structured the same way as for followers, a table mapping the user ID number to the screen name of the user.\\
+
+Tables: \emph{descriptions, followers, friends, usermap}\\
+\\
+\emph{descriptions}:\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+ScreenName & TEXT & The user name of the user.\\
+Description & TEXT & The description of the user.\\
+\end{tabular}\\
+\\
+\emph{followers}:\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+ScreenName & TEXT & The user name of the user.\\
+FollowerId & INT & The ID number of a follower of the user.\\
+\end{tabular}\\
+\\
+\emph{friends}:\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+ScreenName & TEXT & The user name of the user.\\
+FriendId & INT & The ID number of a friend (i.e. other user whom the user is following) of the user.\\
+\end{tabular}\\
+\\
+\emph{usermap}:\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+ScreenName & TEXT & The user name of the user.\\
+UserId & INT & The User ID number of the user.\\
+\end{tabular}\\
+\\
+
+{\bf IPCCdb.db}:\\
+
+The database file \emph{IPCCdb.db} contains the tables for the queries on the hashtags \emph{\#AR5}, \emph{\#HadCRUT}, \emph{\#LTFchat}, \emph{\#Pages2k},  \emph{\#WGII}, \emph{\#GISS}, \emph{\#IPCC}, \emph{\#Pages}, \emph{\#UNFCCC}, \emph{\#WGIII}\\
+
+Tables: \emph{AR5, HadCRUT, LTFchat, Pages2k, WGII, GISS, IPCC, Pages, UNFCCC, WGIII}\\
+Each table contains the tweets for that hashtag/query, all have the same structure. This is the same as for the \emph{tweetsdb.db} file, except with the additional field UserId which stores the User ID number of the posting user directly (this field was accidentally omitted in the construction of the other database).\\
+\\
+\begin{tabular}{l | l | p{13cm}} 
+Id & INT & Unique ID number of the tweet. \\
+ScreenName & TEXT & User name of the posting user. \\
+UserId & INT & The User ID number of the posting user.\\
+FullName & TEXT & Full name of the user (if given). \\
+Tweet & TEXT & Text of the tweet (sometimes truncated due to URLs, etc. added in) \\
+Timestamp & TEXT & Timestamp of the tweet in the form:  "Mon Jun 17 22:38:21 +0000 2013" \\
+RetweetCount & INT & Number of times this tweet has been retweeted.\\
+InReplyToStatusId & INT & If this tweet is a reply to a status, returns the ID number of that status. \\
+InReplyToUserId & INT & If this tweet is a reply, returns the ID of the user to whom the reply is.\\
+Truncated & INT & Always returns 0. \\
+Retweeted & INT & Always returns 0. \\
+FriendsCount & INT & Returns the number of users that the tweeting user is following, at the time of collecting the data.\\
+FollowersCount & INT & Returns the number of users that the are following the tweeting user, at the time of collecting the data.\ \\
+IsRetweet & INT & Field added by myself. Boolean 1 or 0 - whether the tweet is a retweet or not by checking for presence of "RT: @X".\\
+RetweetSource & TEXT & Field added by myself. Returns the username of the original source, if the tweet is a retweet, otherwise returns "-". \\
+ConvertedTime & INT & Field added by myself. The timestamp converted to UNIX time. \\
+RetweetTweet & TEXT & The text only of the Retweet (i.e. "RT: @X" removed) , if it is a retweet, otherwise "-".\\
+\end{tabular}\\
+\\
+
+\section{Table of scripts}
+\begin{tabular}{l | p{11cm}}
+dbgettweets\#climatechange.py & Script to get tweets for \#climatechange hashtag - writes to tweetsdb.db and userdb.db.\\
+\hline
+dbgettweetsClimateChange.py & Script to get tweets for ``Climate Change'' query - writes to tweetsdb.db and userdb.db.\\\hline
+dbgettweetsGlobalWarming.py & Script to get tweets for ``Global Warming'' query - writes to tweetsdb.db and userdb.db.\\\hline
+dbgettweets\#climate.py & Script to get tweets for \#climate hashtag - writes to tweetsdb.db and userdb.db.\\\hline
+dbgettweets\#globalwarming.py & Script to get tweets for \#globalwarming hashtag - writes to tweetsdb.db and userdb.db.\\\hline
+dbgettweets\#agw.py & Script to get tweets for \#agw hashtag - writes to tweetsdb.db and userdb.db.\\\hline
+dbgettweets\#climaterealists.py & Script to get tweets for \#climaterealists hashtag - writes to tweetsdb.db and userdb.db.\\\hline
+gvscript.py & Script to produce GraphView file for plotting timeline of retweets on a specific article.\\\hline
+classtweetreader.py & Class which handles some functions for analysis of data, mostly unused.\\\hline
+fillusermap.py & Script to get ID numbers for users and enter them in to the database, if missing.\\\hline
+retweettest.py & Script to build full retweet graph, inferring most likely intermediate sources from the list of followers and previous retweeters.\\\hline
+mantag2.py & Base script for manual tagging of users from user list as skeptic, activist, etc., requires creation of smaller database first.\\\hline
+cumtime.py & Script to create cumulative plots of users, tweets, and the tweet activity per day.\\\hline
+ipcctags.py & Script which was used to create new database for new hashtags data.\\\hline
+getipcctweets.py & Script which gets tweets for the IPCC related hashtags, writes to IPCCdb.db and userdb.db.\\\hline
+networkxstuff.py & Script to produce GML files for Friend-Follower graph, naive RT graph and mentions graphs.\\\hline
+classtweetgetter.py & Class which handles the obtaining of the data via Twython - hashtag queries, friend/follower queries, etc.\\\hline
+taggraphs.py & Adds colour tags to GML file from tag file.\\\hline
+removeweights.py & Removes edge weights from GML file.\\\hline
+stats.py & Calculates number of users, tweets, mentions, gini coefficient for tweets per user, etc.\\\hline
+extractusers.py & Extracts list of users from GML file.\\\hline
+mentionstag.py & Base script for tagging individual mention tweets - requires produced smaller database.\\\hline
+creatementiondb.py & Creates smaller database of data needed for mention tagging from user list.\\\hline
+createtempdb.py & Creates smaller database of data needed for user tagging from user list.\\\hline
+dbfs.py & Script for calculating path lengths, betweenness.\\\hline
+dbcronscript.sh & Script which runs all of the gettweets scripts.\\\hline
+igraphscript.R & Script to add hierarchical clusters to gml file using igraph in R - didn't work very well, but included in case it is needed in the future.\\\hline
+plotcp.R & Script for plotting cumulative plot graphs in R.\\
+\end{tabular}
+%%% End document
+\end{document}

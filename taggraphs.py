@@ -1,5 +1,5 @@
 import sys
-tagfiles=["usertagstom.txt","usertagschris.txt","usertagsotherchris.txt","usertagssteve.txt","usertagsotheralastair.txt","usertagsalastair.txt","usertagsothertom.txt","usertagslastchris.txt","usertagslastalastair.txt","usertagslasttom.txt"]
+tagfiles=["usertagstom.txt","usertagschris.txt","usertagsotherchris.txt","usertagssteve.txt","usertagsotheralastair.txt","usertagsalastair.txt","usertagsothertom.txt","usertagslastchris.txt","usertagslastalastair.txt","usertagslasttom.txt","usertagsetctestetc.txt"]
 
 #backup graphs first
 
@@ -47,7 +47,7 @@ for item in ud.keys():
 
 # sys.exit()
 
-graphs=["newfriendfollowerhtagwgt4.gml","newfriendfollowerhtgwgt12.gml","newfriendfollowerhtccwgt35.gml"]
+graphs=["fixgwconvew2pc4.gml"]
 #,"newfriendfollowerhtccwgt35.gml","newfriendfollowerhtgwgt12.gml"]
 #graphs=["newrthtccew8comp4.gml"]
 #Somehow write to work with graphs already with tags, and without
@@ -68,6 +68,7 @@ for graph in graphs:
     s=f.read()
     f.close()
     pos=0
+    n=[]
 
     while True:
         try:
@@ -82,7 +83,11 @@ for graph in graphs:
         if "HC2" in s[p1:u]:
             #change HC2
             h=s.index("HC2",p1)
-            s=s[0:h+4]+'"'+fd[name]+'"'+s[h+7:]
+            try:
+                s=s[0:h+4]+'"'+fd[name]+'"'+s[h+7:]
+            except:
+                #n.append(name)
+                print name
             #s=s[0:h+4]+'"T"'+s[h+7:]
         else:
             #add HC2
@@ -90,6 +95,8 @@ for graph in graphs:
             pass
 
         pos=p1+7
+        #print n
+    #sys.exit()
     f=open("t"+graph, "w")
     f.write(s)
     f.close()
